@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!-- templates/sad.html -->
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+    <body>
+        <h1 class="coolTitle">Shopping List</h1>
+        <form action="{{ url_for('update_record')}}" method = "post">
+            <label for="item">input type text:</label>
+            <input type="text" id="item" name="nm" placeholder="item">
+            <p><input type = "submit" value = "submit" /></p>
+        </form>  
+
+        <div class="mylist">
+        </div>
+
+        <script>
+            let savedItems = [];
+            fetch("/list",{
+                method: 'GET'})
+                .then(function(resp) {
+                      return resp.json();
+                      })
+                .then(function(data) {
+                    //savedItems = data.list_;
+                    for (let d of data){
+                        savedItems.push(d);
+                    }
+                    //savedItems.push(data);
+                    for (let i = 0; i < savedItems.length; i++) {
+
+                        renderHTML([{name: savedItems[i]}]);
+                    }
+                    //alert(savedItems);
+                      //savedItems.push(data.list);
+            });
+            // fetch('/list'); // Read how to use fetch in javascript to retrieve json data and save to savedItems
+            
+            // Step 2 - DO NOT USE FORM ACTION, USE JAVASCRIPT, look at what I'm doing and read the details about:
+            // 1) select elements - querySelector
+            // 2) listen to events - addEventListener
+            // 3) what is event and what is event bubbling and event capturing
+            // 3) use fetch to submit request
+            document.querySelector('form').addEventListener('submit', function(e) {
+                e.preventDefault(); // read about event and bubbling and capturing
+                const newItem = document.querySelector('input[type="text"]').value;
+                async function main() {
+                fetch('/list_', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            name: newItem,
+                            status: "new"
+                        })
+                    })
+                    //let result = await response.json();
+                    //alert(result.message);
+                    for (var i = 0; i < savedItems.length; i++) {
+                        if (savedItems[i] !== newItem) {
+                            savedItems.push(newItem);
+                            renderHTML([{name: newItem}]);
+                            break;
+                        }
+                        else{
+                            break;
+                        }
+                    }
+                }
+                main();
+                // Here wait for the response and then save to your list and render HTML (step 3)
+            });
+
+            // Step 3 - convert the list your data to html and render
+            function renderHTML(items) {
+                const targetContainer = document.querySelector('.mylist');
+                items.forEach(item => {
+                    // This is very simple and not always correct way to update HTML, but works in this case
+                    targetContainer.innerHTML += "<div>"+ "<input type=\"checkbox\"><label>" + item.name + "</label>" +"</div>";
+                })
+                let check = document.querySelector('input[type="checkbox"]');
+                if (check.checked == true) {
+                    //targetContainer.innerHTML += "<div>"+ "<input type=\"checkbox\" id='one'><label>" + (item.name).strike() + "</label>" + "<button></button>" +"</div>";
+                }
+            }
+        </script>
+        <style>
+            .mylist > div {
+                margin-bottom: 10px;
+                padding: 10px;
+                border-left: 1px solid #ddd;
+            }
+        </style>
+    </body>
+</html>
